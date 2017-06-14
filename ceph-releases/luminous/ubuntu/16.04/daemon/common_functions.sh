@@ -370,3 +370,13 @@ function calculate_osd_weight {
     OSD_WEIGHT=$(df -P -k "$OSD_PATH" | tail -1 | awk '{ d= $2/1073741824 ; r = sprintf("%.2f", d); print r }')
   fi
 }
+
+function umount_lockbox {
+  if [[ ${OSD_DMCRYPT} -eq 1 ]]; then
+    log "Unmounting LOCKBOX directory"
+    # NOTE(leseb): adding || true so when this bug will be fixed the entrypoint will not fail
+    # Ceph bug tracker: http://tracker.ceph.com/issues/18944
+    DATA_UUID=$(get_part_uuid "${OSD_DEVICE}"1)
+    umount /var/lib/ceph/osd-lockbox/"${DATA_UUID}" || true
+  fi
+}
